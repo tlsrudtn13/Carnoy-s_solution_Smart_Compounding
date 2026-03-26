@@ -119,7 +119,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="ingredientCards">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4" id="ingredientCards">
                     </div>
                 
                 <div class="mt-6 flex justify-end gap-3">
@@ -665,8 +665,8 @@
 
             sortedRecords.forEach(r => {
                 const statusBadge = r.isSalvaged
-                    ? `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeSalvage')}</span>`
-                    : `<span class="bg-green-100 text-green-800 border border-green-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeNormal')}</span>`;
+                    ? `<span class="whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeSalvage')}</span>`
+                    : `<span class="whitespace-nowrap bg-green-100 text-green-800 border border-green-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeNormal')}</span>`;
 
                 const getVal = (id) => r.actuals[id] !== null ? parseFloat(r.actuals[id]).toFixed(2) : '-';
 
@@ -681,7 +681,7 @@
                         <div class="text-xs text-gray-600">Pre: <span id="td_preDx_${r.id}"></span></div>
                         <div class="text-xs text-blue-600 font-semibold">Post: <span id="td_postDx_${r.id}"></span></div>
                     </td>
-                    <td class="px-3 py-3 text-center">
+                    <td class="px-3 py-3 text-center min-w-[120px]">
                         ${statusBadge}
                         <div class="text-[10px] text-gray-500 mt-1" id="td_compoundDate_${r.id}"></div>
                         <div class="text-[10px] text-indigo-600 font-bold" id="td_compounder_${r.id}"></div>
