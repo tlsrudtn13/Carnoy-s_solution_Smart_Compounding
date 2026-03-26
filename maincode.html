@@ -1,9 +1,19 @@
+<!--
+  Carnoy's Solution Smart Compounding & Clinical DB System
+  Copyright (c) 2026 Kyung Su Shin (JBUH, OMFS)
+  Licensed under the MIT License
+  https://github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding
+
+  DISCLAIMER: This tool is for research and clinical reference only.
+  All compounding decisions must be made by qualified medical personnel.
+  The author assumes no liability for clinical outcomes.
+-->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카노이 용액 스마트 조제 & 임상 기록 시스템</title>
+    <title>(Modified) 카노이 솔루션 스마트 조제 및 DB 수집 시스템 for OMFS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -36,7 +46,10 @@
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
                 </select>
-                <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center">
+                <button onclick="showCredit()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-500 hover:text-blue-600 flex items-center justify-center transition shrink-0" data-i18n-title="btnCredit" title="크레딧">
+                    <i class="fas fa-circle-info text-lg"></i>
+                </button>
+                <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center whitespace-nowrap">
                     <i class="fas fa-file-csv mr-2 text-lg"></i> <span data-i18n="btnExport">연구용 CSV 추출</span>
                 </button>
             </div>
@@ -58,28 +71,41 @@
                 </div>
             </div>
 
+            <!-- Draft restore banner -->
+            <div id="draftBanner" class="hidden mb-4 bg-sky-50 border-l-4 border-sky-500 text-sky-800 p-3 rounded-lg flex justify-between items-center shadow-sm">
+                <span class="text-sm"><i class="fas fa-history mr-2 text-sky-500"></i><span data-i18n="draftBannerMsg">작성 중이던 임시 데이터가 있습니다.</span></span>
+                <div class="flex gap-2">
+                    <button onclick="restoreDraft()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded text-xs font-bold transition" data-i18n="draftRestore">복원하기</button>
+                    <button onclick="clearDraft()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs font-bold transition" data-i18n="draftDiscard">버리기</button>
+                </div>
+            </div>
+            <!-- Clinical edit success toast -->
+            <div id="updateBanner" class="hidden mb-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-3 rounded-lg text-sm shadow-sm">
+                <i class="fas fa-check-circle mr-2 text-green-500"></i><span data-i18n="alertUpdateSuccess">임상 정보가 업데이트되었습니다.</span>
+            </div>
+
             <div class="bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200">
                 <h3 class="text-sm font-bold text-blue-800 mb-3 border-b border-gray-300 pb-2"><i class="fas fa-user-injured mr-1"></i> <span data-i18n="sectionClinical">임상 및 수술 정보</span></h3>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="patientId">환자번호 (ID)</label>
-                        <input type="text" id="patientId" data-i18n-ph="placeholderId" placeholder="예: 12345678" class="w-full border rounded p-2 text-sm">
+                        <input type="text" id="patientId" data-i18n-ph="placeholderId" placeholder="예: 12345678" class="w-full border rounded p-2 text-sm" oninput="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="surgeryDate">수술 날짜</label>
-                        <input type="date" id="surgeryDate" class="w-full border rounded p-2 text-sm">
+                        <input type="date" id="surgeryDate" class="w-full border rounded p-2 text-sm" onchange="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="surgeryName">수술명 (Operation)</label>
-                        <input type="text" id="surgeryName" data-i18n-ph="placeholderOp" placeholder="Enucleation & Chemical Cautery" class="w-full border rounded p-2 text-sm">
+                        <input type="text" id="surgeryName" data-i18n-ph="placeholderOp" placeholder="Enucleation & Chemical Cautery" class="w-full border rounded p-2 text-sm" oninput="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="preDiagnosis">예상 진단명 (Pre-op)</label>
-                        <input type="text" id="preDiagnosis" placeholder="OKC" class="w-full border rounded p-2 text-sm">
+                        <input type="text" id="preDiagnosis" placeholder="OKC" class="w-full border rounded p-2 text-sm" oninput="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="postDiagnosis">최종 진단명 (Post-op)</label>
-                        <input type="text" id="postDiagnosis" data-i18n-ph="placeholderPost" placeholder="조직검사 후 입력" class="w-full border rounded p-2 text-sm">
+                        <input type="text" id="postDiagnosis" data-i18n-ph="placeholderPost" placeholder="조직검사 후 입력" class="w-full border rounded p-2 text-sm" oninput="saveDraft()">
                     </div>
                 </div>
 
@@ -87,22 +113,22 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="compounder">조제자 (Compounder)</label>
-                        <input type="text" id="inputName" data-i18n-ph="placeholderName" placeholder="예: 홍길동" class="w-full border rounded p-2 text-sm">
+                        <input type="text" id="inputName" data-i18n-ph="placeholderName" placeholder="예: 홍길동" class="w-full border rounded p-2 text-sm" oninput="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="compoundDate">조제 일자</label>
-                        <input type="date" id="compoundDate" class="w-full border rounded p-2 text-sm">
+                        <input type="date" id="compoundDate" class="w-full border rounded p-2 text-sm" onchange="saveDraft()">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="solutionType">용액 종류</label>
-                        <select id="inputType" class="w-full border rounded p-2 text-sm font-bold text-gray-700" onchange="resetSystem()">
+                        <select id="inputType" class="w-full border rounded p-2 text-sm font-bold text-gray-700" onchange="resetSystem(); saveDraft()">
                             <option value="Modified" id="optModified">Modified Carnoy's (클로로포름 X)</option>
                             <option value="Original" id="optOriginal">Original Carnoy's (클로로포름 O)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="targetVolume">초기 목표 부피 (mL)</label>
-                        <input type="number" id="inputVolume" value="10" min="1" class="w-full border rounded p-2 text-sm font-bold text-blue-600" onchange="resetSystem()">
+                        <input type="number" id="inputVolume" value="10" min="1" class="w-full border rounded p-2 text-sm font-bold text-blue-600" onchange="resetSystem(); saveDraft()">
                     </div>
                 </div>
 
@@ -110,7 +136,7 @@
                     </div>
                 
                 <div class="mt-6 flex justify-end gap-3">
-                    <button onclick="resetSystem()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-bold transition" data-i18n="btnReset">조제 초기화</button>
+                    <button onclick="fullReset()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-bold transition" data-i18n="btnReset">조제 초기화</button>
                     <button onclick="saveRecord()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition shadow-md">
                         <i class="fas fa-save mr-1"></i> <span data-i18n="btnSave">DB에 저장</span>
                     </button>
@@ -130,7 +156,7 @@
                             <th class="px-3 py-3 text-center text-xs font-bold text-gray-600">FeCl3(g)</th>
                             <th class="px-3 py-3 text-center text-xs font-bold text-gray-600">CHCl3(g)</th>
                             <th class="px-3 py-3 text-center text-xs font-bold text-gray-600">Acetic(g)</th>
-                            <th class="px-3 py-3 text-center text-xs font-bold text-red-500"><i class="fas fa-trash"></i></th>
+                            <th class="px-3 py-3 text-center text-xs font-bold text-gray-400 w-16"></th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 text-sm" id="tableBody">
@@ -140,11 +166,121 @@
         </div>
     </div>
 
+    <!-- ===== CREDIT MODAL ===== -->
+    <div id="creditModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" onclick="handleModalBackdrop(event)">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" id="creditCard">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center rounded-t-2xl z-10">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-circle-info text-blue-500"></i>
+                    <span data-i18n="creditTitle">크레딧 & 레퍼런스</span>
+                </h2>
+                <button onclick="hideCredit()" class="text-gray-400 hover:text-gray-700 text-xl transition"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="px-6 py-5 space-y-6">
+                <!-- Creator -->
+                <section>
+                    <h3 class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-user-pen mr-1"></i><span data-i18n="creditMadeBy">만든이</span></h3>
+                    <div class="bg-blue-50 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-hospital text-blue-400 w-4 text-center"></i>
+                            <span class="text-sm font-bold text-gray-800">Kyung Su Shin</span>
+                            <span class="text-xs text-gray-500">· JBUH, OMFS</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-blue-400 w-4 text-center"></i>
+                            <a href="mailto:5848463@naver.com" class="text-sm text-blue-600 hover:underline">5848463@naver.com</a>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-github text-blue-400 w-4 text-center"></i>
+                            <a href="https://github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding" target="_blank" rel="noopener" class="text-sm text-blue-600 hover:underline break-all">github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Formula -->
+                <section>
+                    <h3 class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-flask mr-1"></i><span data-i18n="creditFormula">배합 비율</span></h3>
+                    <div class="space-y-3">
+                        <div class="border border-purple-200 rounded-xl overflow-hidden">
+                            <div class="bg-purple-600 text-white px-4 py-2 text-xs font-bold">Original Carnoy's Solution</div>
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-purple-50 text-purple-800">
+                                    <th class="px-3 py-2 text-left font-bold">성분</th>
+                                    <th class="px-3 py-2 text-center font-bold">용량</th>
+                                    <th class="px-3 py-2 text-center font-bold">중량 (10mL 기준)</th>
+                                </tr></thead>
+                                <tbody class="divide-y divide-purple-100 text-gray-700">
+                                    <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">클로로포름 (CHCl₃)</td><td class="px-3 py-1.5 text-center">3 mL</td><td class="px-3 py-1.5 text-center">4.449 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="border border-blue-200 rounded-xl overflow-hidden">
+                            <div class="bg-blue-600 text-white px-4 py-2 text-xs font-bold">Modified Carnoy's Solution <span class="font-normal opacity-80">(Chloroform-free)</span></div>
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-blue-50 text-blue-800">
+                                    <th class="px-3 py-2 text-left font-bold">성분</th>
+                                    <th class="px-3 py-2 text-center font-bold">용량</th>
+                                    <th class="px-3 py-2 text-center font-bold">중량 (10mL 기준)</th>
+                                </tr></thead>
+                                <tbody class="divide-y divide-blue-100 text-gray-700">
+                                    <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-[10px] text-gray-400 leading-relaxed">* 허용 오차 ±3% (USP &lt;795&gt; ±10% 하한선 대비 강화 적용). 중량법(Gravimetric) 계량 기준. FeCl₃는 고체 분말로 별도 계량.</p>
+                    </div>
+                </section>
+
+                <!-- References -->
+                <section>
+                    <h3 class="text-xs font-bold text-green-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-book-open mr-1"></i><span data-i18n="creditRefs">참고 문헌</span></h3>
+                    <ol class="space-y-3 text-xs text-gray-700 list-none">
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[1]</span>
+                            <span>Cutler EC, Zollinger R. <em>The use of sclerosing solutions in the treatment of cysts and fistulae.</em> <strong>Am J Surg.</strong> 1933;19(3):411–418. DOI: 10.1016/S0002-9610(33)90796-5</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[2]</span>
+                            <span>Voorsmit RACA, Stoelinga PJW, Van Haelst UJGM. <em>The management of keratocysts.</em> <strong>J Maxillofac Surg.</strong> 1981;9(4):228–236. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/6172530/" target="_blank" rel="noopener" class="text-blue-500 hover:underline">6172530</a></span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[3]</span>
+                            <span>Dashow JE, et al. <em>Significantly Decreased Recurrence Rates in Keratocystic Odontogenic Tumor With Simple Enucleation and Curettage Using Carnoy's Versus Modified Carnoy's Solution.</em> <strong>J Oral Maxillofac Surg.</strong> 2015;73(11):2132–2135. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/26044601/" target="_blank" rel="noopener" class="text-blue-500 hover:underline">26044601</a></span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[4]</span>
+                            <span>Allen LV Jr. <em>Ansel's Pharmaceutical Dosage Forms and Drug Delivery Systems.</em> 11th ed. Philadelphia: Wolters Kluwer; 2018.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[5]</span>
+                            <span>ICH (International Conference on Harmonisation). <em>ICH Harmonised Tripartite Guideline: Pharmaceutical Development Q8(R2).</em> Step 4, August 2009.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[6]</span>
+                            <span>United States Pharmacopeial Convention. <em>USP General Chapter &lt;795&gt; Pharmaceutical Compounding—Nonsterile Preparations.</em> USP-NF 2023; effective November 1, 2023.</span>
+                        </li>
+                    </ol>
+                </section>
+
+                <p class="text-[10px] text-center text-gray-400 border-t border-gray-100 pt-4">이 시스템은 연구 및 임상 보조 목적으로 제작되었습니다. 실제 조제 시 담당 의료진의 판단에 따르십시오.</p>
+            </div>
+        </div>
+    </div>
+    <!-- ===== END CREDIT MODAL ===== -->
+
     <script>
         // --- i18n Dictionary ---
         const i18nData = {
             ko: {
-                title: "카노이 스마트 조제 & 임상 데이터 수집기",
+                title: "(Modified) 카노이 솔루션 스마트 조제 및 DB 수집 시스템 for OMFS",
                 subtitle: "영점 조절(Tare) 기반 조제, 동적 스케일링(Salvage Mode) 지원 및 후향적 연구용 데이터 자동 기록",
                 btnExport: "연구용 CSV 추출",
                 salvageAlertTitle: "회생 모드 (Salvage Mode) 작동 중!",
@@ -199,10 +335,23 @@
                 alertExportEmpty: "추출할 데이터가 없습니다.",
                 badgeSalvage: "회생조제",
                 badgeNormal: "정상조제",
-                csvHeader: "연번(No),환자번호,수술날짜,수술명,예상진단,최종진단,조제자,조제일자,용액종류,초기기준부피(mL),조제상태,K값(비율계수),에탄올(g),염화제이철(g),클로로포름(g),아세트산(g)"
+                csvHeader: "연번(No),환자번호,수술날짜,수술명,예상진단,최종진단,조제자,조제일자,용액종류,초기기준부피(mL),조제상태,K값(비율계수),에탄올(g),염화제이철(g),클로로포름(g),아세트산(g)",
+                btnEdit: "수정",
+                btnUpdate: "저장",
+                btnCancel: "취소",
+                alertUpdateSuccess: "임상 정보가 업데이트되었습니다.",
+                compoundLocked: "조제 데이터는 수정 불가 (잠금)",
+                draftBannerMsg: "작성 중이던 임시 데이터가 있습니다.",
+                draftRestore: "복원하기",
+                draftDiscard: "버리기",
+                btnCredit: "크레딧",
+                creditTitle: "크레딧 & 레퍼런스",
+                creditMadeBy: "만든이",
+                creditFormula: "배합 비율",
+                creditRefs: "참고 문헌"
             },
             en: {
-                title: "Carnoy Smart Compounding & Clinical DB",
+                title: "(Modified) Carnoy Solution Smart Compounding & DB Collection System for OMFS",
                 subtitle: "Tare-based compounding, Dynamic Scaling (Salvage Mode), and automatic data logging for research",
                 btnExport: "Export Research CSV",
                 salvageAlertTitle: "Salvage Mode Activated!",
@@ -257,7 +406,20 @@
                 alertExportEmpty: "No data to export.",
                 badgeSalvage: "Salvaged",
                 badgeNormal: "Normal",
-                csvHeader: "No,PatientID,SurgeryDate,Operation,PreDiagnosis,PostDiagnosis,Compounder,CompoundDate,SolutionType,InitialVol(mL),Status,K-Factor,Ethanol(g),FerricChloride(g),Chloroform(g),AceticAcid(g)"
+                csvHeader: "No,PatientID,SurgeryDate,Operation,PreDiagnosis,PostDiagnosis,Compounder,CompoundDate,SolutionType,InitialVol(mL),Status,K-Factor,Ethanol(g),FerricChloride(g),Chloroform(g),AceticAcid(g)",
+                btnEdit: "Edit",
+                btnUpdate: "Save",
+                btnCancel: "Cancel",
+                alertUpdateSuccess: "Clinical info updated.",
+                compoundLocked: "Compound data is locked",
+                draftBannerMsg: "You have unsaved draft data.",
+                draftRestore: "Restore",
+                draftDiscard: "Discard",
+                btnCredit: "Credits",
+                creditTitle: "Credits & References",
+                creditMadeBy: "Author",
+                creditFormula: "Formulation Ratios",
+                creditRefs: "References"
             }
         };
 
@@ -283,6 +445,12 @@
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
                 const key = el.getAttribute('data-i18n-ph');
                 if (t(key)) el.placeholder = t(key);
+            });
+
+            // Update title attributes (tooltip text)
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (t(key)) el.title = t(key);
             });
 
             // Update specific mixed elements safely
@@ -382,7 +550,7 @@
                     <div class="bg-white p-4 rounded-xl border ${isDisabled ? 'opacity-40 bg-gray-100' : 'border-gray-200 shadow-sm transition-all duration-300'}" id="card_${ing.id}">
                         <div class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5" id="ingName_${ing.id}">
                             ${ing.name}
-                            ${ing.isSolid ? `<span class="text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full" id="solidBadge_${ing.id}">${t('solidBadge')}</span>` : ''}
+                            ${ing.isSolid ? `<span class="whitespace-nowrap text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full" id="solidBadge_${ing.id}">${t('solidBadge')}</span>` : ''}
                         </div>
                         
                         <div class="flex justify-between items-end mb-2">
@@ -393,9 +561,9 @@
                         </div>
                         
                         <div class="relative">
-                            <input type="number" step="0.01" id="actual_${ing.id}" placeholder="${t('inputActual')}" 
-                                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-bold transition focus:outline-none focus:border-${ing.color}-500" 
-                                oninput="processInputs()" ${isDisabled ? 'disabled' : ''}>
+                            <input type="number" step="0.001" min="0" id="actual_${ing.id}" placeholder="${t('inputActual')}"
+                                class="w-full border-2 border-gray-300 rounded-lg p-3 text-sm font-bold transition focus:outline-none focus:border-${ing.color}-500"
+                                oninput="processInputs(); saveDraft()" ${isDisabled ? 'disabled' : ''}>
                         </div>
                         
                         <div id="salvageBox_${ing.id}" class="hidden mt-3 bg-amber-50 border border-amber-300 rounded-lg p-3 shadow-inner">
@@ -407,7 +575,7 @@
                                 <span class="text-red-600 font-bold text-base" id="addMore_${ing.id}">+0.00g</span>
                             </div>
                             <div class="flex gap-2 items-center">
-                                <input type="number" step="0.01" id="extra_${ing.id}" placeholder="${t('salvageBoxInput')}" class="w-full border border-amber-400 rounded p-1 text-sm font-bold text-amber-900 bg-white">
+                                <input type="number" step="0.001" min="0" id="extra_${ing.id}" placeholder="${t('salvageBoxInput')}" class="w-full border border-amber-400 rounded p-1 text-sm font-bold text-amber-900 bg-white">
                                 <button onclick="applyExtra('${ing.id}')" id="btn_apply_${ing.id}" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition shadow">${t('btnApply')}</button>
                             </div>
                             <div class="text-[10px] text-gray-500 mt-2 text-right"><span id="lbl_accum_${ing.id}">${t('currentAccum')}</span> <span id="currentIn_${ing.id}">0.00</span>g</div>
@@ -427,7 +595,8 @@
             
             if(!isNaN(extraVal) && extraVal > 0) {
                 const currentVal = parseFloat(mainInput.value) || 0;
-                mainInput.value = (currentVal + extraVal).toFixed(2);
+                // Math.round to 3 decimal places avoids floating-point drift (e.g. 4.72+0.10 = 4.820000000000003)
+                mainInput.value = (Math.round((currentVal + extraVal) * 1000) / 1000).toFixed(3);
                 extraInput.value = ''; 
                 processInputs(); 
             } else {
@@ -456,8 +625,8 @@
                 const targetEl = document.getElementById(`target_${ing.id}`);
                 const actualEl = document.getElementById(`actual_${ing.id}`);
                 
-                if (baseEl) baseEl.innerText = baseTargets[ing.id].toFixed(2);
-                if (targetEl) targetEl.innerText = baseTargets[ing.id].toFixed(2);
+                if (baseEl) baseEl.innerText = baseTargets[ing.id].toFixed(3);
+                if (targetEl) targetEl.innerText = baseTargets[ing.id].toFixed(3);
                 
                 if(actualEl && !actualEl.disabled) {
                     actualEl.value = '';
@@ -475,7 +644,7 @@
                     const actual = parseFloat(inputEl.value);
                     const base = baseTargets[ing.id];
                     if (base > 0) {
-                        const ratio = actual / base;
+                        const ratio = Math.round((actual / base) * 1e6) / 1e6;
                         if (ratio > 1.03 && ratio > maxRatio) {
                             maxRatio = ratio;
                         }
@@ -507,7 +676,7 @@
                 currentTargets[ing.id] = newTarget;
                 
                 const targetDisplayEl = document.getElementById(`target_${ing.id}`);
-                if (targetDisplayEl) targetDisplayEl.innerText = newTarget.toFixed(2);
+                if (targetDisplayEl) targetDisplayEl.innerText = newTarget.toFixed(3);
 
                 const actual = parseFloat(inputEl.value);
 
@@ -517,7 +686,8 @@
                 if (cardEl) cardEl.classList.remove('border-amber-400', 'bg-amber-50', 'shadow-md');
                 if (labelTargetEl) labelTargetEl.classList.remove('text-amber-600', 'animate-pulse');
 
-                if (isNaN(actual)) {
+                // Treat negative values the same as empty input (invalid)
+                if (isNaN(actual) || actual < 0) {
                     if (isSalvageMode) {
                         if (cardEl) cardEl.classList.add('border-amber-400', 'bg-amber-50', 'shadow-md');
                         if (salvageBox) salvageBox.classList.remove('hidden');
@@ -571,8 +741,9 @@
                 const el = document.getElementById(`actual_${ing.id}`);
                 if (el && !el.disabled) {
                     const actual = parseFloat(el.value);
-                    const target = currentTargets[ing.id];
-                    if(isNaN(actual) || actual < target * 0.97) isValid = false;
+                    // Guard NaN and negative before storing — prevents "NaN" strings in CSV exports
+                    if (isNaN(actual) || actual < 0) { isValid = false; return; }
+                    if (actual < currentTargets[ing.id] * 0.97) isValid = false;
                     actualData[ing.id] = actual;
                 } else {
                     actualData[ing.id] = null;
@@ -596,14 +767,14 @@
                 type: document.getElementById('inputType').value,
                 baseVolume: document.getElementById('inputVolume').value,
                 isSalvaged: isSalvageMode,
-                kFactor: globalK.toFixed(3),
+                kFactor: globalK,
                 actuals: actualData,
                 targets: {...currentTargets}
             };
 
             dbRecords.push(record);
-            localStorage.setItem('carnoyDB', JSON.stringify(dbRecords)); 
-            
+            localStorage.setItem('carnoyDB', JSON.stringify(dbRecords));
+            clearDraft();
             resetSystem();
             alert(t('alertSaveSuccess'));
         }
@@ -616,6 +787,14 @@
             }
         }
 
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         function loadTable() {
             const tbody = document.getElementById('tableBody');
             if (!tbody) return;
@@ -624,40 +803,206 @@
             const sortedRecords = [...dbRecords].reverse();
 
             sortedRecords.forEach(r => {
-                const statusBadge = r.isSalvaged 
-                    ? `<span class="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeSalvage')}</span>`
-                    : `<span class="bg-green-100 text-green-800 border border-green-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeNormal')}</span>`;
+                const statusBadge = r.isSalvaged
+                    ? `<span class="whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeSalvage')}</span>`
+                    : `<span class="whitespace-nowrap bg-green-100 text-green-800 border border-green-300 px-2 py-1 rounded text-[10px] font-bold">${t('badgeNormal')}</span>`;
 
                 const getVal = (id) => r.actuals[id] !== null ? parseFloat(r.actuals[id]).toFixed(2) : '-';
 
+                // Main data row (user data rendered via textContent below to prevent XSS)
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="px-3 py-3">
-                        <div class="text-sm font-bold text-gray-800">${r.patientId}</div>
-                        <div class="text-[10px] text-gray-500">${r.surgeryDate}</div>
+                        <div class="text-sm font-bold text-gray-800" id="td_patientId_${r.id}"></div>
+                        <div class="text-[10px] text-gray-500" id="td_surgeryDate_${r.id}"></div>
                     </td>
                     <td class="px-3 py-3">
-                        <div class="text-xs text-gray-600">Pre: ${r.preDiagnosis}</div>
-                        <div class="text-xs text-blue-600 font-semibold">Post: ${r.postDiagnosis}</div>
+                        <div class="text-xs text-gray-600">Pre: <span id="td_preDx_${r.id}"></span></div>
+                        <div class="text-xs text-blue-600 font-semibold">Post: <span id="td_postDx_${r.id}"></span></div>
                     </td>
-                    <td class="px-3 py-3 text-center">
+                    <td class="px-3 py-3 text-center min-w-[120px]">
                         ${statusBadge}
-                        <div class="text-[10px] text-gray-500 mt-1">${r.compoundDate}</div>
-                        <div class="text-[10px] text-indigo-600 font-bold">${r.compounder}</div>
+                        <div class="text-[10px] text-gray-500 mt-1" id="td_compoundDate_${r.id}"></div>
+                        <div class="text-[10px] text-indigo-600 font-bold" id="td_compounder_${r.id}"></div>
                     </td>
-                    <td class="px-3 py-3 text-xs font-bold text-gray-700">${r.type}<br><span class="text-gray-400 font-normal">${r.baseVolume}mL</span></td>
-                    <td class="px-3 py-3 text-center text-xs text-gray-500 font-mono">x${r.kFactor}</td>
+                    <td class="px-3 py-3 text-xs font-bold text-gray-700">${escapeHtml(r.type)}<br><span class="text-gray-400 font-normal">${escapeHtml(r.baseVolume)}mL</span></td>
+                    <td class="px-3 py-3 text-center text-xs text-gray-500 font-mono">x${parseFloat(r.kFactor).toFixed(3)}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('EtOH')}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('Fe')}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('Chloro')}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('Acetic')}</td>
                     <td class="px-3 py-3 text-center">
-                        <button onclick="deleteRecord(${r.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                        <div class="flex flex-col gap-1.5 items-center">
+                            <button onclick="toggleEdit(${r.id})" id="editBtn_${r.id}" class="text-blue-400 hover:text-blue-600 transition" title="${t('btnEdit')}"><i class="fas fa-pen text-xs"></i></button>
+                            <button onclick="deleteRecord(${r.id})" class="text-red-400 hover:text-red-600 transition"><i class="fas fa-trash-alt text-xs"></i></button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
+
+                // Set text content safely (XSS prevention)
+                document.getElementById(`td_patientId_${r.id}`).textContent = r.patientId;
+                document.getElementById(`td_surgeryDate_${r.id}`).textContent = r.surgeryDate;
+                document.getElementById(`td_preDx_${r.id}`).textContent = r.preDiagnosis;
+                document.getElementById(`td_postDx_${r.id}`).textContent = r.postDiagnosis;
+                document.getElementById(`td_compoundDate_${r.id}`).textContent = r.compoundDate;
+                document.getElementById(`td_compounder_${r.id}`).textContent = r.compounder;
+
+                // Inline clinical edit row (compounding fields are read-only)
+                const editTr = document.createElement('tr');
+                editTr.id = `editRow_${r.id}`;
+                editTr.className = 'hidden bg-sky-50';
+                editTr.innerHTML = `
+                    <td colspan="10" class="px-4 py-4 border-b-2 border-sky-200">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">${t('patientId')}</label>
+                                <input type="text" id="edt_patientId_${r.id}" class="w-full border border-sky-300 rounded p-1.5 text-sm mt-1 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">${t('surgeryDate')}</label>
+                                <input type="date" id="edt_surgeryDate_${r.id}" class="w-full border border-sky-300 rounded p-1.5 text-sm mt-1 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">${t('surgeryName')}</label>
+                                <input type="text" id="edt_surgeryName_${r.id}" class="w-full border border-sky-300 rounded p-1.5 text-sm mt-1 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">${t('preDiagnosis')}</label>
+                                <input type="text" id="edt_preDiagnosis_${r.id}" class="w-full border border-sky-300 rounded p-1.5 text-sm mt-1 focus:outline-none focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">${t('postDiagnosis')}</label>
+                                <input type="text" id="edt_postDiagnosis_${r.id}" class="w-full border border-sky-300 rounded p-1.5 text-sm mt-1 focus:outline-none focus:border-sky-500 font-bold text-blue-700">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400"><i class="fas fa-lock mr-1"></i>${t('compoundLocked')}</span>
+                            <div class="flex gap-2">
+                                <button onclick="toggleEdit(${r.id})" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-xs font-bold transition">${t('btnCancel')}</button>
+                                <button onclick="updateClinical(${r.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-xs font-bold transition shadow"><i class="fas fa-check mr-1"></i>${t('btnUpdate')}</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(editTr);
+
+                // Populate edit row inputs safely via .value (not via innerHTML)
+                document.getElementById(`edt_patientId_${r.id}`).value = r.patientId;
+                document.getElementById(`edt_surgeryDate_${r.id}`).value = r.surgeryDate;
+                document.getElementById(`edt_surgeryName_${r.id}`).value = r.surgeryName;
+                document.getElementById(`edt_preDiagnosis_${r.id}`).value = r.preDiagnosis;
+                document.getElementById(`edt_postDiagnosis_${r.id}`).value = r.postDiagnosis;
             });
         }
+
+        // --- Clinical Edit ---
+        function toggleEdit(id) {
+            const row = document.getElementById(`editRow_${id}`);
+            if (!row) return;
+            const isHidden = row.classList.toggle('hidden');
+            const btn = document.getElementById(`editBtn_${id}`);
+            if (btn) btn.classList.toggle('text-blue-600', !isHidden);
+        }
+
+        function updateClinical(id) {
+            const idx = dbRecords.findIndex(r => r.id === id);
+            if (idx === -1) return;
+            dbRecords[idx].patientId    = document.getElementById(`edt_patientId_${id}`).value.trim()    || 'N/A';
+            dbRecords[idx].surgeryDate  = document.getElementById(`edt_surgeryDate_${id}`).value;
+            dbRecords[idx].surgeryName  = document.getElementById(`edt_surgeryName_${id}`).value.trim()  || 'N/A';
+            dbRecords[idx].preDiagnosis = document.getElementById(`edt_preDiagnosis_${id}`).value.trim() || 'N/A';
+            dbRecords[idx].postDiagnosis = document.getElementById(`edt_postDiagnosis_${id}`).value.trim() || 'Pending';
+            localStorage.setItem('carnoyDB', JSON.stringify(dbRecords));
+            loadTable();
+            const banner = document.getElementById('updateBanner');
+            if (banner) {
+                banner.classList.remove('hidden');
+                setTimeout(() => banner.classList.add('hidden'), 2500);
+            }
+        }
+
+        // --- Draft Auto-save ---
+        function saveDraft() {
+            const draft = {
+                patientId:    document.getElementById('patientId').value,
+                surgeryDate:  document.getElementById('surgeryDate').value,
+                surgeryName:  document.getElementById('surgeryName').value,
+                preDiagnosis: document.getElementById('preDiagnosis').value,
+                postDiagnosis: document.getElementById('postDiagnosis').value,
+                inputName:    document.getElementById('inputName').value,
+                compoundDate: document.getElementById('compoundDate').value,
+                inputType:    document.getElementById('inputType').value,
+                inputVolume:  document.getElementById('inputVolume').value,
+                actuals: {}
+            };
+            ingredients.forEach(ing => {
+                const el = document.getElementById(`actual_${ing.id}`);
+                if (el) draft.actuals[ing.id] = el.value;
+            });
+            localStorage.setItem('carnoyDraft', JSON.stringify(draft));
+        }
+
+        function checkForDraft() {
+            const d = JSON.parse(localStorage.getItem('carnoyDraft') || 'null');
+            if (!d) return;
+            const hasData = d.patientId || d.surgeryName ||
+                            Object.values(d.actuals || {}).some(v => v !== '');
+            if (hasData) document.getElementById('draftBanner').classList.remove('hidden');
+        }
+
+        function restoreDraft() {
+            const draft = JSON.parse(localStorage.getItem('carnoyDraft'));
+            if (!draft) return;
+            document.getElementById('patientId').value    = draft.patientId    || '';
+            document.getElementById('surgeryDate').value  = draft.surgeryDate  || '';
+            document.getElementById('surgeryName').value  = draft.surgeryName  || '';
+            document.getElementById('preDiagnosis').value = draft.preDiagnosis || '';
+            document.getElementById('postDiagnosis').value = draft.postDiagnosis || '';
+            document.getElementById('inputName').value    = draft.inputName    || '';
+            document.getElementById('compoundDate').value = draft.compoundDate || '';
+            if (draft.inputType)   document.getElementById('inputType').value   = draft.inputType;
+            if (draft.inputVolume) document.getElementById('inputVolume').value = draft.inputVolume;
+            // Re-render cards for the restored type/volume, then fill actual values
+            resetSystem();
+            if (draft.actuals) {
+                ingredients.forEach(ing => {
+                    const el = document.getElementById(`actual_${ing.id}`);
+                    if (el && draft.actuals[ing.id] !== undefined) el.value = draft.actuals[ing.id];
+                });
+                processInputs();
+            }
+            hideDraftBanner();
+        }
+
+        function clearDraft() {
+            localStorage.removeItem('carnoyDraft');
+            hideDraftBanner();
+        }
+
+        function hideDraftBanner() {
+            document.getElementById('draftBanner').classList.add('hidden');
+        }
+
+        // --- Full Reset (clears draft + resets form) ---
+        function fullReset() {
+            resetSystem();
+            clearDraft();
+        }
+
+        // --- Credit Modal ---
+        function showCredit() {
+            document.getElementById('creditModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function hideCredit() {
+            document.getElementById('creditModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        function handleModalBackdrop(e) {
+            if (!document.getElementById('creditCard').contains(e.target)) hideCredit();
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCredit(); });
 
         function exportToCSV() {
             if(dbRecords.length === 0) {
@@ -674,7 +1019,7 @@
                 const row = [
                     index + 1, 
                     safe(r.patientId), safe(r.surgeryDate), safe(r.surgeryName), safe(r.preDiagnosis), safe(r.postDiagnosis),
-                    safe(r.compounder), safe(r.compoundDate), r.type, r.baseVolume, status, r.kFactor,
+                    safe(r.compounder), safe(r.compoundDate), r.type, r.baseVolume, status, parseFloat(r.kFactor).toFixed(3),
                     getVal('EtOH'), getVal('Fe'), getVal('Chloro'), getVal('Acetic')
                 ];
                 csv.push(row.join(","));
@@ -685,11 +1030,13 @@
             link.href = window.URL.createObjectURL(blob);
             link.download = `Carnoy_Clinical_Data_${new Date().toISOString().split('T')[0]}.csv`; 
             link.click();
+            URL.revokeObjectURL(link.href);
         }
 
-        // 초기화 실행 (순서 변경 및 안전 로직 강화)
-        resetSystem();       // 1. 렌더링 및 테이블 생성 (DOM 준비 완료)
-        applyTranslations(); // 2. 언어 사전 세팅 및 UI 텍스트 반영
+        // 초기화 실행
+        resetSystem();       // 1. 카드 렌더링 및 테이블 생성
+        applyTranslations(); // 2. 언어 적용
+        checkForDraft();     // 3. 미완성 임시 데이터 존재 시 복원 배너 표시
     </script>
 </body>
 </html>
