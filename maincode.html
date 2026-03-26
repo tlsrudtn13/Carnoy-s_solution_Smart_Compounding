@@ -180,7 +180,8 @@
                 ingEtOH: "1. 무수 에탄올",
                 ingFe: "2. 염화제이철",
                 ingChloro: "3. 클로로포름",
-                ingAcetic: "4. 아세트산", // 빙초산 -> 아세트산 변경
+                ingAcetic: "4. 아세트산",
+                solidBadge: "고체 분말",
                 baseTarget: "초기 기준:",
                 finalTarget: "목표 투입량:",
                 inputActual: "투입량 입력 (g)",
@@ -237,7 +238,8 @@
                 ingEtOH: "1. Absolute Ethanol",
                 ingFe: "2. Ferric Chloride",
                 ingChloro: "3. Chloroform",
-                ingAcetic: "4. Acetic Acid", // Updated to match Korean change
+                ingAcetic: "4. Acetic Acid",
+                solidBadge: "Solid Powder",
                 baseTarget: "Initial Base:",
                 finalTarget: "Target Amount:",
                 inputActual: "Input Amount (g)",
@@ -299,6 +301,12 @@
             ingredients[2].name = t('ingChloro');
             ingredients[3].name = t('ingAcetic');
 
+            // Update solid powder badges
+            ingredients.forEach(ing => {
+                const badgeEl = document.getElementById(`solidBadge_${ing.id}`);
+                if (badgeEl) badgeEl.innerText = t('solidBadge');
+            });
+
             // Update Dynamic UI Text without full reset
             ingredients.forEach(ing => {
                 const nameEl = document.getElementById(`ingName_${ing.id}`);
@@ -338,11 +346,23 @@
         document.getElementById('surgeryDate').valueAsDate = new Date();
         document.getElementById('compoundDate').valueAsDate = new Date();
 
+        // Formula basis (Voorsmit et al., 1981 — J Maxillofac Surg 9:228-236. PMID: 6172530):
+        //   Original Carnoy's:  EtOH 6mL : CHCl3 3mL : AcOH 1mL  + 1g FeCl3(s) per 10mL batch
+        //   Modified Carnoy's:  EtOH 6mL : AcOH 1mL              + 1g FeCl3(s) per 10mL batch
+        //   (Modified = chloroform-free alternative following FDA restrictions)
+        //
+        // FeCl3 is a SOLID powder. baseVol here represents grams per standard 10mL batch,
+        //   with density=1.000 used as a passthrough (g = baseVol × 1.000 × multiplier).
+        //
+        // Tolerance: ±3% (tighter than USP <795> ±10% floor).
+        //   Rationale: Carnoy's is a chemical cauterant causing ~1.5mm irreversible bone necrosis.
+        //   Gravimetric (weight-based) measurement enables ±3% precision on a standard lab balance,
+        //   providing tighter batch-to-batch consistency than the USP minimum allows.
         const ingredients = [
-            { id: 'EtOH', name: '1. 무수 에탄올', baseVol: {Original: 6, Modified: 7}, density: 0.789, color: 'blue' },
-            { id: 'Fe', name: '2. 염화제이철', baseVol: {Original: 1, Modified: 1}, density: 1.000, color: 'amber' },
-            { id: 'Chloro', name: '3. 클로로포름', baseVol: {Original: 3, Modified: 0}, density: 1.483, color: 'purple' },
-            { id: 'Acetic', name: '4. 아세트산', baseVol: {Original: 1, Modified: 1}, density: 1.049, color: 'green' }
+            { id: 'EtOH',   name: '1. 무수 에탄올',          baseVol: {Original: 6, Modified: 6}, density: 0.789, color: 'blue',   isSolid: false },
+            { id: 'Fe',     name: '2. 염화제이철',            baseVol: {Original: 1, Modified: 1}, density: 1.000, color: 'amber',  isSolid: true  },
+            { id: 'Chloro', name: '3. 클로로포름',            baseVol: {Original: 3, Modified: 0}, density: 1.483, color: 'purple', isSolid: false },
+            { id: 'Acetic', name: '4. 아세트산',              baseVol: {Original: 1, Modified: 1}, density: 1.049, color: 'green',  isSolid: false }
         ];
 
         let baseTargets = {};
@@ -360,7 +380,10 @@
                 const isDisabled = (type === 'Modified' && ing.id === 'Chloro');
                 const cardHtml = `
                     <div class="bg-white p-4 rounded-xl border ${isDisabled ? 'opacity-40 bg-gray-100' : 'border-gray-200 shadow-sm transition-all duration-300'}" id="card_${ing.id}">
-                        <div class="text-sm font-bold text-gray-800 mb-2" id="ingName_${ing.id}">${ing.name}</div>
+                        <div class="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1.5" id="ingName_${ing.id}">
+                            ${ing.name}
+                            ${ing.isSolid ? `<span class="text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full" id="solidBadge_${ing.id}">${t('solidBadge')}</span>` : ''}
+                        </div>
                         
                         <div class="flex justify-between items-end mb-2">
                             <div class="text-[11px] text-gray-500"><span id="lbl_base_${ing.id}">${t('baseTarget')}</span> <span id="base_${ing.id}">0.00</span>g</div>
