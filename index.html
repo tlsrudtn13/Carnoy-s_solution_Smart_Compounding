@@ -36,6 +36,9 @@
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
                 </select>
+                <button onclick="showCredit()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center border border-gray-300">
+                    <i class="fas fa-circle-info mr-2"></i> <span data-i18n="btnCredit">크레딧</span>
+                </button>
                 <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center">
                     <i class="fas fa-file-csv mr-2 text-lg"></i> <span data-i18n="btnExport">연구용 CSV 추출</span>
                 </button>
@@ -153,6 +156,116 @@
         </div>
     </div>
 
+    <!-- ===== CREDIT MODAL ===== -->
+    <div id="creditModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" onclick="handleModalBackdrop(event)">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" id="creditCard">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center rounded-t-2xl z-10">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-circle-info text-blue-500"></i>
+                    <span data-i18n="creditTitle">크레딧 & 레퍼런스</span>
+                </h2>
+                <button onclick="hideCredit()" class="text-gray-400 hover:text-gray-700 text-xl transition"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="px-6 py-5 space-y-6">
+                <!-- Creator -->
+                <section>
+                    <h3 class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-user-pen mr-1"></i><span data-i18n="creditMadeBy">만든이</span></h3>
+                    <div class="bg-blue-50 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-hospital text-blue-400 w-4 text-center"></i>
+                            <span class="text-sm font-bold text-gray-800">Kyung Su Shin</span>
+                            <span class="text-xs text-gray-500">· JBUH, OMFS</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-blue-400 w-4 text-center"></i>
+                            <a href="mailto:5848463@naver.com" class="text-sm text-blue-600 hover:underline">5848463@naver.com</a>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-github text-blue-400 w-4 text-center"></i>
+                            <a href="https://github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding" target="_blank" rel="noopener" class="text-sm text-blue-600 hover:underline break-all">github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Formula -->
+                <section>
+                    <h3 class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-flask mr-1"></i><span data-i18n="creditFormula">배합 비율</span></h3>
+                    <div class="space-y-3">
+                        <div class="border border-purple-200 rounded-xl overflow-hidden">
+                            <div class="bg-purple-600 text-white px-4 py-2 text-xs font-bold">Original Carnoy's Solution</div>
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-purple-50 text-purple-800">
+                                    <th class="px-3 py-2 text-left font-bold">성분</th>
+                                    <th class="px-3 py-2 text-center font-bold">용량</th>
+                                    <th class="px-3 py-2 text-center font-bold">중량 (10mL 기준)</th>
+                                </tr></thead>
+                                <tbody class="divide-y divide-purple-100 text-gray-700">
+                                    <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">클로로포름 (CHCl₃)</td><td class="px-3 py-1.5 text-center">3 mL</td><td class="px-3 py-1.5 text-center">4.449 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="border border-blue-200 rounded-xl overflow-hidden">
+                            <div class="bg-blue-600 text-white px-4 py-2 text-xs font-bold">Modified Carnoy's Solution <span class="font-normal opacity-80">(Chloroform-free)</span></div>
+                            <table class="w-full text-xs">
+                                <thead><tr class="bg-blue-50 text-blue-800">
+                                    <th class="px-3 py-2 text-left font-bold">성분</th>
+                                    <th class="px-3 py-2 text-center font-bold">용량</th>
+                                    <th class="px-3 py-2 text-center font-bold">중량 (10mL 기준)</th>
+                                </tr></thead>
+                                <tbody class="divide-y divide-blue-100 text-gray-700">
+                                    <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-[10px] text-gray-400 leading-relaxed">* 허용 오차 ±3% (USP &lt;795&gt; ±10% 하한선 대비 강화 적용). 중량법(Gravimetric) 계량 기준. FeCl₃는 고체 분말로 별도 계량.</p>
+                    </div>
+                </section>
+
+                <!-- References -->
+                <section>
+                    <h3 class="text-xs font-bold text-green-700 uppercase tracking-widest mb-3 flex items-center gap-1"><i class="fas fa-book-open mr-1"></i><span data-i18n="creditRefs">참고 문헌</span></h3>
+                    <ol class="space-y-3 text-xs text-gray-700 list-none">
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[1]</span>
+                            <span>Cutler EC, Zollinger R. <em>The use of sclerosing solutions in the treatment of cysts and fistulae.</em> <strong>Am J Surg.</strong> 1933;19(3):411–418. DOI: 10.1016/S0002-9610(33)90796-5</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[2]</span>
+                            <span>Voorsmit RACA, Stoelinga PJW, Van Haelst UJGM. <em>The management of keratocysts.</em> <strong>J Maxillofac Surg.</strong> 1981;9(4):228–236. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/6172530/" target="_blank" rel="noopener" class="text-blue-500 hover:underline">6172530</a></span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[3]</span>
+                            <span>Dashow JE, et al. <em>Significantly Decreased Recurrence Rates in Keratocystic Odontogenic Tumor With Simple Enucleation and Curettage Using Carnoy's Versus Modified Carnoy's Solution.</em> <strong>J Oral Maxillofac Surg.</strong> 2015;73(11):2132–2135. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/26044601/" target="_blank" rel="noopener" class="text-blue-500 hover:underline">26044601</a></span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[4]</span>
+                            <span>Allen LV Jr. <em>Ansel's Pharmaceutical Dosage Forms and Drug Delivery Systems.</em> 11th ed. Philadelphia: Wolters Kluwer; 2018.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[5]</span>
+                            <span>ICH (International Conference on Harmonisation). <em>ICH Harmonised Tripartite Guideline: Pharmaceutical Development Q8(R2).</em> Step 4, August 2009.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-green-600 font-bold shrink-0">[6]</span>
+                            <span>United States Pharmacopeial Convention. <em>USP General Chapter &lt;795&gt; Pharmaceutical Compounding—Nonsterile Preparations.</em> USP-NF 2023; effective November 1, 2023.</span>
+                        </li>
+                    </ol>
+                </section>
+
+                <p class="text-[10px] text-center text-gray-400 border-t border-gray-100 pt-4">이 시스템은 연구 및 임상 보조 목적으로 제작되었습니다. 실제 조제 시 담당 의료진의 판단에 따르십시오.</p>
+            </div>
+        </div>
+    </div>
+    <!-- ===== END CREDIT MODAL ===== -->
+
     <script>
         // --- i18n Dictionary ---
         const i18nData = {
@@ -220,7 +333,12 @@
                 compoundLocked: "조제 데이터는 수정 불가 (잠금)",
                 draftBannerMsg: "작성 중이던 임시 데이터가 있습니다.",
                 draftRestore: "복원하기",
-                draftDiscard: "버리기"
+                draftDiscard: "버리기",
+                btnCredit: "크레딧",
+                creditTitle: "크레딧 & 레퍼런스",
+                creditMadeBy: "만든이",
+                creditFormula: "배합 비율",
+                creditRefs: "참고 문헌"
             },
             en: {
                 title: "(Modified) Carnoy Solution Smart Compounding & DB Collection System for OMFS",
@@ -286,7 +404,12 @@
                 compoundLocked: "Compound data is locked",
                 draftBannerMsg: "You have unsaved draft data.",
                 draftRestore: "Restore",
-                draftDiscard: "Discard"
+                draftDiscard: "Discard",
+                btnCredit: "Credits",
+                creditTitle: "Credits & References",
+                creditMadeBy: "Author",
+                creditFormula: "Formulation Ratios",
+                creditRefs: "References"
             }
         };
 
@@ -847,6 +970,20 @@
         function fullReset() {
             resetSystem();
             clearDraft();
+        }
+
+        // --- Credit Modal ---
+        function showCredit() {
+            document.getElementById('creditModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function hideCredit() {
+            document.getElementById('creditModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        function handleModalBackdrop(e) {
+            // Close only when clicking the backdrop, not the card itself
+            if (!document.getElementById('creditCard').contains(e.target)) hideCredit();
         }
 
         function exportToCSV() {
