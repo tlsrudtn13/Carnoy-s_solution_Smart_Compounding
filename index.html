@@ -36,10 +36,10 @@
     <div class="max-w-7xl mx-auto space-y-6">
         <div class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-blue-600 flex justify-between items-center flex-wrap gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">
+                <h1 class="text-2xl font-bold text-gray-800 [word-break:keep-all]">
                     <i class="fas fa-vial text-blue-600 mr-2"></i><span data-i18n="title">카노이 스마트 조제 & 임상 데이터 수집기</span>
                 </h1>
-                <p class="text-gray-500 mt-2 text-sm" data-i18n="subtitle">영점 조절(Tare) 기반 조제, 동적 스케일링(Salvage Mode) 지원 및 후향적 연구용 데이터 자동 기록</p>
+                <p class="text-gray-500 mt-2 text-sm [word-break:keep-all]" data-i18n="subtitle">영점 조절(Tare) 기반 조제, 동적 스케일링(Salvage Mode) 지원 및 후향적 연구용 데이터 자동 기록</p>
             </div>
             <div class="flex items-center gap-3">
                 <select id="langSelect" onchange="changeLanguage()" class="bg-gray-100 border border-gray-300 text-gray-700 text-sm font-bold rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none cursor-pointer">
@@ -50,7 +50,7 @@
                     <i class="fas fa-circle-info text-lg"></i>
                 </button>
                 <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center whitespace-nowrap">
-                    <i class="fas fa-file-csv mr-2 text-lg"></i> <span data-i18n="btnExport">연구용 CSV 추출</span>
+                    <i class="fas fa-file-csv mr-2 text-lg"></i> <span data-i18n="btnExport">CSV 추출</span>
                 </button>
             </div>
         </div>
@@ -215,7 +215,7 @@
                                 <tbody class="divide-y divide-purple-100 text-gray-700">
                                     <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
                                     <tr><td class="px-3 py-1.5">클로로포름 (CHCl₃)</td><td class="px-3 py-1.5 text-center">3 mL</td><td class="px-3 py-1.5 text-center">4.449 g</td></tr>
-                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">아세트산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
                                     <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
                                 </tbody>
                             </table>
@@ -230,7 +230,7 @@
                                 </tr></thead>
                                 <tbody class="divide-y divide-blue-100 text-gray-700">
                                     <tr><td class="px-3 py-1.5">무수 에탄올 (Absolute EtOH)</td><td class="px-3 py-1.5 text-center">6 mL</td><td class="px-3 py-1.5 text-center">4.734 g</td></tr>
-                                    <tr><td class="px-3 py-1.5">빙초산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
+                                    <tr><td class="px-3 py-1.5">아세트산 (Glacial AcOH)</td><td class="px-3 py-1.5 text-center">1 mL</td><td class="px-3 py-1.5 text-center">1.049 g</td></tr>
                                     <tr class="bg-amber-50"><td class="px-3 py-1.5 font-bold text-amber-800">염화제이철 FeCl₃ <span class="text-[10px] font-normal">(고체 분말)</span></td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">—</td><td class="px-3 py-1.5 text-center text-amber-800 font-bold">1.000 g</td></tr>
                                 </tbody>
                             </table>
@@ -286,7 +286,7 @@
             ko: {
                 title: "(Modified) 카노이 솔루션 스마트 조제 및 DB 수집 시스템 for OMFS",
                 subtitle: "영점 조절(Tare) 기반 조제, 동적 스케일링(Salvage Mode) 지원 및 후향적 연구용 데이터 자동 기록",
-                btnExport: "연구용 CSV 추출",
+                btnExport: "CSV 추출",
                 salvageAlertTitle: "회생 모드 (Salvage Mode) 작동 중!",
                 salvageText1: "목표치 초과 투입이 감지되어 전체 비율을 자동 스케일업했습니다. ",
                 salvageText2: "폐기하지 마시고",
@@ -357,7 +357,7 @@
             en: {
                 title: "(Modified) Carnoy Solution Smart Compounding & DB Collection System for OMFS",
                 subtitle: "Tare-based compounding, Dynamic Scaling (Salvage Mode), and automatic data logging for research",
-                btnExport: "Export Research CSV",
+                btnExport: "Export CSV",
                 salvageAlertTitle: "Salvage Mode Activated!",
                 salvageText1: "Overpour detected. Overall ratio has been automatically scaled up. ",
                 salvageText2: "Do NOT discard.",
