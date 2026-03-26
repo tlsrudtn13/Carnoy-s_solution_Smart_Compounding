@@ -36,10 +36,10 @@
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
                 </select>
-                <button onclick="showCredit()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2.5 rounded-lg text-sm font-bold transition shadow-sm flex items-center border border-gray-300">
-                    <i class="fas fa-circle-info mr-2"></i> <span data-i18n="btnCredit">크레딧</span>
+                <button onclick="showCredit()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-500 hover:text-blue-600 flex items-center justify-center transition shrink-0" data-i18n-title="btnCredit" title="크레딧">
+                    <i class="fas fa-circle-info text-lg"></i>
                 </button>
-                <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center">
+                <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center whitespace-nowrap">
                     <i class="fas fa-file-csv mr-2 text-lg"></i> <span data-i18n="btnExport">연구용 CSV 추출</span>
                 </button>
             </div>
@@ -435,6 +435,12 @@
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
                 const key = el.getAttribute('data-i18n-ph');
                 if (t(key)) el.placeholder = t(key);
+            });
+
+            // Update title attributes (tooltip text)
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (t(key)) el.title = t(key);
             });
 
             // Update specific mixed elements safely
