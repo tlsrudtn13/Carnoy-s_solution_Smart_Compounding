@@ -121,14 +121,14 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="solutionType">용액 종류</label>
-                        <select id="inputType" class="w-full border rounded p-2 text-sm font-bold text-gray-700" onchange="resetSystem(); saveDraft()">
+                        <select id="inputType" class="w-full border rounded p-2 text-sm font-bold text-gray-700" onchange="onTypeChange(); saveDraft()">
                             <option value="Modified" id="optModified">Modified Carnoy's (클로로포름 X)</option>
                             <option value="Original" id="optOriginal">Original Carnoy's (클로로포름 O)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1" data-i18n="targetVolume">초기 목표 부피 (mL)</label>
-                        <input type="number" id="inputVolume" value="10" min="1" class="w-full border rounded p-2 text-sm font-bold text-blue-600" onchange="resetSystem(); saveDraft()">
+                        <input type="number" id="inputVolume" value="7" min="1" class="w-full border rounded p-2 text-sm font-bold text-blue-600" onchange="resetSystem(); saveDraft()">
                     </div>
                 </div>
 
@@ -520,10 +520,10 @@
 
         // Formula basis (Voorsmit et al., 1981 — J Maxillofac Surg 9:228-236. PMID: 6172530):
         //   Original Carnoy's:  EtOH 6mL : CHCl3 3mL : AcOH 1mL  + 1g FeCl3(s) per 10mL batch
-        //   Modified Carnoy's:  EtOH 6mL : AcOH 1mL              + 1g FeCl3(s) per 10mL batch
+        //   Modified Carnoy's:  EtOH 6mL : AcOH 1mL              + 1g FeCl3(s) per  7mL batch
         //   (Modified = chloroform-free alternative following FDA restrictions)
         //
-        // FeCl3 is a SOLID powder. baseVol here represents grams per standard 10mL batch,
+        // FeCl3 is a SOLID powder. baseVol here represents grams per standard batch,
         //   with density=1.000 used as a passthrough (g = baseVol × 1.000 × multiplier).
         //
         // Tolerance: ±3% (tighter than USP <795> ±10% floor).
@@ -608,11 +608,26 @@
             }
         }
 
+        function getBaseTotal(type) {
+            // Liquid-only volume sum (exclude solid FeCl3) per standard batch
+            // Original: 6+3+1 = 10mL, Modified: 6+0+1 = 7mL
+            return ingredients
+                .filter(ing => !ing.isSolid)
+                .reduce((sum, ing) => sum + ing.baseVol[type], 0);
+        }
+
+        function onTypeChange() {
+            const type = document.getElementById('inputType').value;
+            document.getElementById('inputVolume').value = getBaseTotal(type);
+            resetSystem();
+        }
+
         function resetSystem() {
             renderCards();
             const type = document.getElementById('inputType').value;
-            const vol = parseFloat(document.getElementById('inputVolume').value) || 10;
-            const multiplier = vol / 10.0;
+            const baseTotal = getBaseTotal(type);
+            const vol = parseFloat(document.getElementById('inputVolume').value) || baseTotal;
+            const multiplier = vol / baseTotal;
             
             isSalvageMode = false;
             globalK = 1.0;
