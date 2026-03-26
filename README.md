@@ -135,6 +135,7 @@
 4. Allen LV Jr. *Ansel's Pharmaceutical Dosage Forms and Drug Delivery Systems.* 11th ed. Wolters Kluwer; 2018.
 5. ICH. *ICH Q8(R2) Pharmaceutical Development.* Step 4, August 2009.
 6. USP General Chapter \<795\> *Pharmaceutical Compounding—Nonsterile Preparations.* Effective November 1, 2023.
+7. Jeon WY, Park JH, Ku JK, Baek JA, Ko SO. *Is conservative treatment (enucleation using modified Carnoy's solution) of odontogenic keratocyst in the maxilla good prognosis?* **J Korean Assoc Oral Maxillofac Surg.** 2023 Oct 31;49(5):287–291. [PMID: 37907344](https://pubmed.ncbi.nlm.nih.gov/37907344/) | DOI: [10.5125/jkaoms.2023.49.5.287](https://doi.org/10.5125/jkaoms.2023.49.5.287)
 
 ---
 
@@ -279,6 +280,7 @@ Click **Export Research CSV** (top-right) to download all records as an Excel-co
 4. Allen LV Jr. *Ansel's Pharmaceutical Dosage Forms and Drug Delivery Systems.* 11th ed. Wolters Kluwer; 2018.
 5. ICH. *ICH Q8(R2) Pharmaceutical Development.* Step 4, August 2009.
 6. USP General Chapter \<795\> *Pharmaceutical Compounding—Nonsterile Preparations.* Effective November 1, 2023.
+7. Jeon WY, Park JH, Ku JK, Baek JA, Ko SO. *Is conservative treatment (enucleation using modified Carnoy's solution) of odontogenic keratocyst in the maxilla good prognosis?* **J Korean Assoc Oral Maxillofac Surg.** 2023 Oct 31;49(5):287–291. [PMID: 37907344](https://pubmed.ncbi.nlm.nih.gov/37907344/) | DOI: [10.5125/jkaoms.2023.49.5.287](https://doi.org/10.5125/jkaoms.2023.49.5.287)
 
 ---
 
