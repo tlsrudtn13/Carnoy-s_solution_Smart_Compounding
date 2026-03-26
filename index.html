@@ -1,3 +1,13 @@
+<!--
+  Carnoy's Solution Smart Compounding & Clinical DB System
+  Copyright (c) 2026 Kyung Su Shin (JBUH, OMFS)
+  Licensed under the MIT License
+  https://github.com/tlsrudtn13/Carnoy-s_solution_Smart_Compounding
+
+  DISCLAIMER: This tool is for research and clinical reference only.
+  All compounding decisions must be made by qualified medical personnel.
+  The author assumes no liability for clinical outcomes.
+-->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -615,8 +625,8 @@
                 const targetEl = document.getElementById(`target_${ing.id}`);
                 const actualEl = document.getElementById(`actual_${ing.id}`);
                 
-                if (baseEl) baseEl.innerText = baseTargets[ing.id].toFixed(2);
-                if (targetEl) targetEl.innerText = baseTargets[ing.id].toFixed(2);
+                if (baseEl) baseEl.innerText = baseTargets[ing.id].toFixed(3);
+                if (targetEl) targetEl.innerText = baseTargets[ing.id].toFixed(3);
                 
                 if(actualEl && !actualEl.disabled) {
                     actualEl.value = '';
@@ -634,7 +644,7 @@
                     const actual = parseFloat(inputEl.value);
                     const base = baseTargets[ing.id];
                     if (base > 0) {
-                        const ratio = actual / base;
+                        const ratio = Math.round((actual / base) * 1e6) / 1e6;
                         if (ratio > 1.03 && ratio > maxRatio) {
                             maxRatio = ratio;
                         }
@@ -666,7 +676,7 @@
                 currentTargets[ing.id] = newTarget;
                 
                 const targetDisplayEl = document.getElementById(`target_${ing.id}`);
-                if (targetDisplayEl) targetDisplayEl.innerText = newTarget.toFixed(2);
+                if (targetDisplayEl) targetDisplayEl.innerText = newTarget.toFixed(3);
 
                 const actual = parseFloat(inputEl.value);
 
@@ -757,7 +767,7 @@
                 type: document.getElementById('inputType').value,
                 baseVolume: document.getElementById('inputVolume').value,
                 isSalvaged: isSalvageMode,
-                kFactor: globalK.toFixed(3),
+                kFactor: globalK,
                 actuals: actualData,
                 targets: {...currentTargets}
             };
@@ -816,7 +826,7 @@
                         <div class="text-[10px] text-indigo-600 font-bold" id="td_compounder_${r.id}"></div>
                     </td>
                     <td class="px-3 py-3 text-xs font-bold text-gray-700">${escapeHtml(r.type)}<br><span class="text-gray-400 font-normal">${escapeHtml(r.baseVolume)}mL</span></td>
-                    <td class="px-3 py-3 text-center text-xs text-gray-500 font-mono">x${escapeHtml(r.kFactor)}</td>
+                    <td class="px-3 py-3 text-center text-xs text-gray-500 font-mono">x${parseFloat(r.kFactor).toFixed(3)}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('EtOH')}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('Fe')}</td>
                     <td class="px-3 py-3 text-center font-bold text-gray-800">${getVal('Chloro')}</td>
@@ -934,9 +944,11 @@
         }
 
         function checkForDraft() {
-            if (localStorage.getItem('carnoyDraft')) {
-                document.getElementById('draftBanner').classList.remove('hidden');
-            }
+            const d = JSON.parse(localStorage.getItem('carnoyDraft') || 'null');
+            if (!d) return;
+            const hasData = d.patientId || d.surgeryName ||
+                            Object.values(d.actuals || {}).some(v => v !== '');
+            if (hasData) document.getElementById('draftBanner').classList.remove('hidden');
         }
 
         function restoreDraft() {
@@ -988,9 +1000,9 @@
             document.body.style.overflow = '';
         }
         function handleModalBackdrop(e) {
-            // Close only when clicking the backdrop, not the card itself
             if (!document.getElementById('creditCard').contains(e.target)) hideCredit();
         }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') hideCredit(); });
 
         function exportToCSV() {
             if(dbRecords.length === 0) {
@@ -1007,7 +1019,7 @@
                 const row = [
                     index + 1, 
                     safe(r.patientId), safe(r.surgeryDate), safe(r.surgeryName), safe(r.preDiagnosis), safe(r.postDiagnosis),
-                    safe(r.compounder), safe(r.compoundDate), r.type, r.baseVolume, status, r.kFactor,
+                    safe(r.compounder), safe(r.compoundDate), r.type, r.baseVolume, status, parseFloat(r.kFactor).toFixed(3),
                     getVal('EtOH'), getVal('Fe'), getVal('Chloro'), getVal('Acetic')
                 ];
                 csv.push(row.join(","));
